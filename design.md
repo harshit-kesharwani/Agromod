@@ -72,11 +72,14 @@ AgroMod follows a modern cloud-native microservices architecture deployed on AWS
 - Progressive Web App (PWA) capabilities for offline support
 
 **Backend Services:**
-- Django
-- TypeScript for type safety
-- AWS Lambda for serverless compute
+- Python 3.11+ with Django 5.0+
+- Django REST Framework (DRF) for API development
+- djangorestframework-simplejwt for JWT authentication
+- Celery for asynchronous task processing
+- Django Channels for WebSocket support (future real-time features)
+- AWS Lambda with Python runtime or ECS/Fargate for containerized Django
 - AWS API Gateway for REST API management
-- JWT for authentication tokens
+- Gunicorn/uWSGI as WSGI server
 
 **AI & ML Services:**
 - Amazon Bedrock (Claude/Titan models) for chatbot and AI inference
@@ -1055,37 +1058,50 @@ Response: {
 
 ### 4.1 Authentication Service
 
-**Technology:** Node.js + Express + JWT + bcrypt
+**Technology:** Django + Django REST Framework + djangorestframework-simplejwt
 
 **Key Features:**
-- Password hashing with bcrypt (salt rounds: 12)
-- JWT tokens with 1-hour expiration
+- Password hashing with Django's built-in PBKDF2 algorithm (default, 600,000 iterations)
+- JWT tokens with 1-hour expiration (access token)
 - Refresh tokens with 7-day expiration
-- Email verification using AWS SES
-- Password reset with time-limited tokens (1 hour)
-- Failed login attempt tracking (lock after 5 attempts)
-- Session management in DynamoDB with TTL
+- Email verification using AWS SES with Django email backend
+- Password reset with time-limited tokens (1 hour) using Django's PasswordResetTokenGenerator
+- Failed login attempt tracking (lock after 5 attempts) using Django-axes or custom middleware
+- Session management in DynamoDB or Django's session framework
 
 **Security Measures:**
-- Rate limiting: 5 login attempts per 15 minutes per IP
-- Password complexity validation
+- Rate limiting: Django-ratelimit or Django REST Framework throttling (5 login attempts per 15 minutes per IP)
+- Password complexity validation using Django password validators
 - HTTPS-only cookies for refresh tokens
 - Token rotation on refresh
-- Audit logging for all auth events
+- Audit logging for all auth events using Django signals
+
+**Django Apps Structure:**
+```
+authentication/
+├── models.py          # User model (extending AbstractUser)
+├── serializers.py     # DRF serializers for auth endpoints
+├── views.py           # API views for login, register, etc.
+├── urls.py            # URL routing
+├── permissions.py     # Custom permission classes
+├── middleware.py      # Rate limiting, logging
+└── tasks.py           # Celery tasks for email sending
+```
 
 ### 4.2 Disease Detection Service
 
-**Technology:** Python + FastAPI + Amazon Bedrock + Rekognition
+**Technology:** Django + Django REST Framework + Amazon Bedrock + Rekognition + Celery
 
 **Implementation Flow:**
-1. Receive image upload via API Gateway
-2. Validate image format and size (max 10MB)
-3. Store original image in S3 with unique key
-4. Invoke Rekognition Custom Labels model for disease detection
-5. If confidence > 70%, query Bedrock for treatment recommendations
-6. Translate results to Hindi if needed
-7. Store detection results in PostgreSQL
-8. Return response with diseases and treatments
+1. Receive image upload via DRF APIView with file upload
+2. Validate image format and size (max 10MB) using Django validators
+3. Store original image in S3 using boto3 and django-storages
+4. Queue Celery task for async processing
+5. Invoke Rekognition Custom Labels model for disease detection
+6. If confidence > 70%, query Bedrock for treatment recommendations
+7. Translate results to Hindi if needed using Bedrock
+8. Store detection results in PostgreSQL using Django ORM
+9. Return response with diseases and treatments
 
 **Model Training:**
 - Custom Rekognition model trained on 50+ crop diseases
@@ -1098,58 +1114,85 @@ Response: {
 - Provide general crop health tips
 - Allow farmers to request human expert review
 
+**Django Apps Structure:**
+```
+disease_detection/
+├── models.py          # DiseaseDetection, Treatment models
+├── serializers.py     # DRF serializers
+├── views.py           # Upload and detection API views
+├── tasks.py           # Celery tasks for async processing
+├── services.py        # Business logic for AI integration
+└── utils.py           # Helper functions
+```
+
 ### 4.3 Yield Prediction Service
 
-**Technology:** Python + FastAPI + SageMaker + Amazon Bedrock
+**Technology:** Django + Django REST Framework + SageMaker + Amazon Bedrock + Celery
 
 **Implementation Flow:**
-1. Receive crop details and location
-2. Fetch historical weather data for location
-3. Retrieve regional yield patterns from database
+1. Receive crop details and location via DRF API
+2. Fetch historical weather data for location using external API
+3. Retrieve regional yield patterns from database using Django ORM
 4. Query soil data and crop-specific parameters
-5. Invoke SageMaker endpoint with ML model
-6. Calculate confidence intervals
-7. Use Bedrock to generate natural language explanations
-8. Store prediction in database
-9. Return forecast with visualizations
+5. Queue Celery task for async prediction
+6. Invoke SageMaker endpoint with ML model using boto3
+7. Calculate confidence intervals
+8. Use Bedrock to generate natural language explanations
+9. Store prediction in database using Django models
+10. Return forecast with visualizations
 
 **ML Model:**
 - Random Forest or XGBoost for yield prediction
 - Features: weather patterns, soil type, crop variety, historical yields, planting date
 - Training data: 5+ years of regional agricultural data
-- Model retraining: Quarterly with new harvest data
+- Model retraining: Quarterly with new harvest data using Django management commands
 - Confidence scoring based on data quality and model uncertainty
 
 **Update Strategy:**
 - Recalculate predictions when weather forecasts change significantly
-- Notify farmers of major prediction changes (>15% difference)
+- Notify farmers of major prediction changes (>15% difference) via Celery tasks
 - Improve accuracy with actual harvest data feedback loop
+
+**Django Apps Structure:**
+```
+yield_prediction/
+├── models.py          # YieldPrediction, HistoricalData models
+├── serializers.py     # DRF serializers
+├── views.py           # Prediction API views
+├── tasks.py           # Celery tasks for async predictions
+├── services.py        # ML model integration
+├── ml_utils.py        # Feature engineering utilities
+└── management/
+    └── commands/
+        └── retrain_model.py  # Model retraining command
+```
 
 ### 4.4 Chatbot Service
 
-**Technology:** Node.js + Express + Amazon Bedrock + Transcribe + Polly
+**Technology:** Django + Django REST Framework + Amazon Bedrock + Transcribe + Polly + Celery
 
 **Implementation Flow (Text):**
-1. Receive user message and conversation context
-2. Retrieve user profile and crop records for personalization
+1. Receive user message and conversation context via DRF API
+2. Retrieve user profile and crop records for personalization using Django ORM
 3. Build prompt with context and agricultural knowledge base
-4. Invoke Bedrock (Claude 3) for response generation
+4. Invoke Bedrock (Claude 3) for response generation using boto3
 5. Translate response if language differs from input
-6. Store conversation in DynamoDB
+6. Store conversation in DynamoDB or PostgreSQL using Django models
 7. Return response with suggestions
 
 **Implementation Flow (Voice):**
-1. Receive audio file
-2. Invoke AWS Transcribe for speech-to-text (Hindi/English)
-3. Process transcribed text through chatbot logic
-4. Generate text response
-5. Invoke AWS Polly for text-to-speech in target language
-6. Store audio response in S3 with short TTL (24 hours)
-7. Return transcription, text response, and audio URL
+1. Receive audio file via DRF file upload
+2. Queue Celery task for async processing
+3. Invoke AWS Transcribe for speech-to-text (Hindi/English) using boto3
+4. Process transcribed text through chatbot logic
+5. Generate text response
+6. Invoke AWS Polly for text-to-speech in target language
+7. Store audio response in S3 with short TTL (24 hours)
+8. Return transcription, text response, and audio URL
 
 **Prompt Engineering:**
 - System prompt with agricultural expertise context
-- Include user's crops, location, and recent activities
+- Include user's crops, location, and recent activities from Django models
 - Provide access to policy database, disease info, and weather data
 - Instruct model to suggest relevant features (disease detection, yield prediction)
 - Limit response length for voice output (max 200 words)
@@ -1157,21 +1200,34 @@ Response: {
 **Context Management:**
 - Maintain last 10 messages in conversation
 - Track referenced crops and topics
-- Clear context after 30 minutes of inactivity
-- Use DynamoDB TTL for automatic cleanup
+- Clear context after 30 minutes of inactivity using Django cache
+- Use DynamoDB TTL or PostgreSQL for automatic cleanup
+
+**Django Apps Structure:**
+```
+chatbot/
+├── models.py          # Conversation, Message models
+├── serializers.py     # DRF serializers
+├── views.py           # Chat API views
+├── tasks.py           # Celery tasks for voice processing
+├── services.py        # Bedrock integration
+├── prompts.py         # Prompt templates
+└── context_manager.py # Conversation context handling
+```
 
 ### 4.5 Weather Service
 
-**Technology:** Node.js + Express + OpenWeatherMap API + AWS SNS
+**Technology:** Django + Django REST Framework + OpenWeatherMap API + AWS SNS + Celery Beat
 
 **Implementation Flow:**
-1. Poll weather API every 15 minutes for registered locations
-2. Compare current conditions with farmer alert thresholds
-3. Detect severe weather events from API alerts
-4. Generate alert messages in English and Hindi
-5. Store alerts in DynamoDB
-6. Send notifications via SNS (SMS, email, push)
-7. Update weather cache in ElastiCache
+1. Use Celery Beat for scheduled tasks (poll weather API every 15 minutes)
+2. Fetch weather data for registered locations using Django ORM queries
+3. Compare current conditions with farmer alert thresholds
+4. Detect severe weather events from API alerts
+5. Generate alert messages in English and Hindi using Django templates
+6. Store alerts in DynamoDB or PostgreSQL
+7. Send notifications via SNS (SMS, email, push) using Celery tasks
+8. Update weather cache in Django cache framework or ElastiCache
 
 **Alert Logic:**
 - Heavy rain: >50mm in 24 hours
@@ -1181,28 +1237,39 @@ Response: {
 - Critical events: Hail, tornado, flood warnings
 
 **Optimization:**
-- Cache weather forecasts for 15 minutes
+- Cache weather forecasts for 15 minutes using Django cache
 - Batch location queries by region
-- Use CloudWatch Events for scheduled polling
+- Use Celery Beat for scheduled polling
 - Deduplicate alerts within 6-hour window
+
+**Django Apps Structure:**
+```
+weather/
+├── models.py          # WeatherAlert, AlertPreference models
+├── serializers.py     # DRF serializers
+├── views.py           # Weather API views
+├── tasks.py           # Celery tasks for polling and alerts
+├── services.py        # Weather API integration
+└── alert_logic.py     # Alert threshold checking
+```
 
 ### 4.6 Crop Planner Service
 
-**Technology:** Node.js + Express + AWS EventBridge
+**Technology:** Django + Django REST Framework + Celery Beat
 
 **Implementation Flow:**
-1. When crop is created, generate activity schedule based on crop type
-2. Store activities in PostgreSQL with scheduled dates
-3. Create EventBridge rules for reminder triggers
+1. When crop is created, generate activity schedule based on crop type using Django signals
+2. Store activities in PostgreSQL using Django ORM
+3. Create Celery Beat periodic tasks for reminder triggers
 4. When reminder fires, check weather conditions
 5. If weather is unfavorable, suggest rescheduling
-6. Send notification via Notification Service
-7. Mark reminder as sent
+6. Send notification via Notification Service using Celery tasks
+7. Mark reminder as sent in database
 
 **Schedule Generation:**
 - Crop-specific templates (e.g., wheat: irrigation every 7 days, fertilization at 30/60 days)
 - Adjust for growth stages and local climate
-- Allow farmer customization
+- Allow farmer customization via Django admin or API
 - Factor in expected weather patterns
 
 **Reminder Timing:**
@@ -1211,24 +1278,36 @@ Response: {
 - Multiple reminders for critical activities
 - Smart rescheduling based on weather
 
+**Django Apps Structure:**
+```
+crop_planner/
+├── models.py          # CropActivity, ActivityTemplate models
+├── serializers.py     # DRF serializers
+├── views.py           # Planner API views
+├── tasks.py           # Celery tasks for reminders
+├── signals.py         # Django signals for auto-scheduling
+├── schedule_generator.py  # Activity schedule logic
+└── templates/         # Crop-specific schedule templates
+```
+
 ### 4.7 Notification Service
 
-**Technology:** Node.js + Express + AWS SNS + AWS SES + Firebase FCM
+**Technology:** Django + Django REST Framework + AWS SNS + AWS SES + Firebase FCM + Celery
 
 **Implementation Flow:**
-1. Receive notification request from other services
-2. Check user notification preferences
-3. Translate message to user's preferred language
-4. Route to appropriate channels:
-   - Email: AWS SES
-   - SMS: AWS SNS
-   - Push: Firebase Cloud Messaging
-5. Store notification record in DynamoDB
+1. Receive notification request from other services via internal API or Celery task
+2. Check user notification preferences using Django ORM
+3. Translate message to user's preferred language using Django templates
+4. Route to appropriate channels using Celery tasks:
+   - Email: AWS SES via django-ses
+   - SMS: AWS SNS via boto3
+   - Push: Firebase Cloud Messaging via firebase-admin
+5. Store notification record in DynamoDB or PostgreSQL
 6. Track delivery status
-7. Retry failed notifications (max 3 attempts)
+7. Retry failed notifications (max 3 attempts) using Celery retry mechanism
 
 **Message Templates:**
-- Weather alerts
+- Weather alerts (Django templates)
 - Crop activity reminders
 - Policy updates
 - Disease detection results
@@ -1236,10 +1315,25 @@ Response: {
 - System announcements
 
 **Delivery Guarantees:**
-- At-least-once delivery
+- At-least-once delivery via Celery
 - Exponential backoff for retries
 - Dead letter queue for failed notifications
 - Delivery status tracking
+
+**Django Apps Structure:**
+```
+notifications/
+├── models.py          # Notification, NotificationPreference models
+├── serializers.py     # DRF serializers
+├── views.py           # Notification API views
+├── tasks.py           # Celery tasks for sending
+├── services.py        # SNS, SES, FCM integration
+├── templates/         # Email and message templates
+└── channels/          # Channel-specific handlers
+    ├── email.py
+    ├── sms.py
+    └── push.py
+```
 
 ## 5. Frontend Architecture
 
@@ -1536,15 +1630,16 @@ interface JWTPayload {
 ### 8.1 Testing Levels
 
 **Unit Tests:**
-- Jest for JavaScript/TypeScript
+- pytest and pytest-django for Python/Django testing
 - Coverage target: 80%
-- Test business logic and utilities
-- Mock external dependencies
+- Test business logic, models, serializers, and utilities
+- Mock external dependencies using pytest fixtures and unittest.mock
 
 **Integration Tests:**
-- Test API endpoints with test database
+- Test API endpoints with test database using Django TestCase
 - Test service interactions
 - Test AWS service integrations (LocalStack for local testing)
+- Use Django REST Framework's APITestCase
 
 **E2E Tests:**
 - Playwright for browser automation
@@ -1556,15 +1651,15 @@ interface JWTPayload {
   - Vendor search and contact
 
 **Performance Tests:**
-- Load testing with Artillery or k6
+- Load testing with Locust (Python-based) or k6
 - Target: 10,000 concurrent users
 - Test API response times under load
-- Test database query performance
+- Test database query performance with Django Debug Toolbar
 
 **Security Tests:**
 - OWASP ZAP for vulnerability scanning
 - Penetration testing (quarterly)
-- Dependency vulnerability scanning
+- Dependency vulnerability scanning with safety or pip-audit
 - Infrastructure security audits
 
 ### 8.2 Test Data Management
