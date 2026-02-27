@@ -1,7 +1,7 @@
 import api from './api'
 
-export async function login(email, password) {
-  const { data } = await api.post('/api/auth/login/', { email, password })
+export async function login(email, password, userType) {
+  const { data } = await api.post('/api/auth/login/', { email, password, user_type: userType })
   return data
 }
 
@@ -30,4 +30,18 @@ export function getStoredTokens() {
     access: localStorage.getItem('accessToken'),
     refresh: localStorage.getItem('refreshToken'),
   }
+}
+
+export async function forgotPassword(email) {
+  const { data } = await api.post('/api/auth/forgot-password/', { email })
+  return data
+}
+
+export async function resetPassword(email, token, newPassword) {
+  const { data } = await api.post('/api/auth/reset-password/', {
+    email,
+    token,
+    new_password: newPassword,
+  })
+  return data
 }
