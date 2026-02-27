@@ -34,7 +34,7 @@ class RegisterSerializer(serializers.ModelSerializer):
         user.save()
         if role == 'farmer':
             from .models import FarmerProfile
-            FarmerProfile.objects.get_or_create(user=user, defaults={'region': '', 'preferred_crops': ''})
+            FarmerProfile.objects.get_or_create(user=user, defaults={'region': ''})
         elif role == 'vendor':
             from .models import VendorProfile
             vp_data = vp or {}
