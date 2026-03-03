@@ -107,3 +107,11 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': ['rest_framework_simplejwt.authentication.JWTAuthentication'],
     'DEFAULT_PERMISSION_CLASSES': ['rest_framework.permissions.AllowAny'],
 }
+
+# ---------------------------------------------------------------------------
+# AWS Bedrock
+# ---------------------------------------------------------------------------
+AWS_ACCESS_KEY_ID = env('AWS_ACCESS_KEY_ID', '')
+AWS_SECRET_ACCESS_KEY = env('AWS_SECRET_ACCESS_KEY', '')
+AWS_BEDROCK_REGION = env('AWS_BEDROCK_REGION', 'us-east-1')
+AWS_BEDROCK_MODEL_ID = env('AWS_BEDROCK_MODEL_ID', 'amazon.nova-lite-v1:0')

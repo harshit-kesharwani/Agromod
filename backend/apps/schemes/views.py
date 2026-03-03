@@ -3,8 +3,8 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
 
-from .models import Scheme
-from .serializers import SchemeSerializer
+from .models import Scheme, GovUpdate
+from .serializers import SchemeSerializer, GovUpdateSerializer
 
 
 class SchemeListView(APIView):
@@ -440,3 +440,15 @@ class SchemeCheckEligibilityView(APIView):
                 result_lines.append('Please check with your local agriculture office for detailed eligibility.')
 
         return Response({'result': '\n'.join(result_lines)})
+
+
+class GovUpdatesView(APIView):
+    permission_classes = [AllowAny]
+
+    def get(self, request):
+        limit = int(request.query_params.get('limit', 10))
+        update_type = request.query_params.get('type', '')
+        qs = GovUpdate.objects.all()
+        if update_type:
+            qs = qs.filter(update_type=update_type)
+        return Response(GovUpdateSerializer(qs[:limit], many=True).data)

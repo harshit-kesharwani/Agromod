@@ -72,7 +72,7 @@ export default function Weather() {
           alert_frost: prefs.alert_frost,
           alert_heavy_rain: prefs.alert_heavy_rain,
           alert_heat: prefs.alert_heat,
-        }).then(() => { loadCurrent(); loadPrefs(); setLocationName('Current location') }).catch(() => setGeoError('Failed to save location')).finally(() => setLoading(false))
+        }).then(({ data }) => { loadCurrent(); loadPrefs(); setLocationName(data.location_name || 'Current location') }).catch(() => setGeoError('Failed to save location')).finally(() => setLoading(false))
       },
       () => {
         setGeoError('Could not get your location. Check permissions or try search.')
