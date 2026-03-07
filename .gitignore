@@ -1,0 +1,131 @@
+# ============================
+# Environment & Secrets
+# ============================
+.env
+.env.*
+.env.local
+.env.development
+.env.production
+.env.staging
+.flaskenv
+
+# ============================
+# Credentials & Keys
+# ============================
+*.pem
+*.key
+*.cert
+*.crt
+*.p12
+*.pfx
+*.jks
+*.keystore
+*.cer
+credentials*.json
+service-account*.json
+*secret*.json
+*.gpg
+
+# ============================
+# Python
+# ============================
+__pycache__/
+*.py[cod]
+*.pyo
+*.egg-info/
+*.egg
+*.whl
+*.so
+dist/
+build/
+*.manifest
+*.spec
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Virtual environments
+venv/
+.venv/
+env/
+ENV/
+
+# ============================
+# Node
+# ============================
+node_modules/
+
+# ============================
+# Build outputs
+# ============================
+frontend/dist/
+frontend/build/
+
+# ============================
+# IDE
+# ============================
+.vscode/
+.idea/
+*.swp
+*.swo
+*.sublime-project
+*.sublime-workspace
+
+# ============================
+# OS
+# ============================
+.DS_Store
+Thumbs.db
+Desktop.ini
+ehthumbs.db
+
+# ============================
+# Django
+# ============================
+*.sqlite3
+*.db
+backend/staticfiles/
+backend/media/
+
+# ============================
+# Logs
+# ============================
+*.log
+logs/
+
+# ============================
+# Docker (secrets in overrides)
+# ============================
+docker-compose.override.yml
+
+# ============================
+# Misc sensitive / generated
+# ============================
+*.bak
+*.tmp
+*.temp
+.cache/
+.pytest_cache/
+.coverage
+htmlcov/
+.mypy_cache/
+.ruff_cache/
+
+# Vite cache
+frontend/.vite/
+
+# ============================
+# Lambda / Deployment artifacts
+# ============================
+backend/lambda_package/
+backend/lambda_package.zip
+backend/handler_venv/
+backend/lambda_env.json
+backend/zappa_settings.json
+temp_deployed.js
+
+# ============================
+# Empty asset / image dirs
+# ============================
+proposal_images/
+template_images/
+

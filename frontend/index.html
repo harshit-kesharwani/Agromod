@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#2e7d32" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,200..1000;1,200..1000&display=swap" rel="stylesheet" />
+    <title>Agromod - One Stop Farmer Platform</title>
+    <style>
+      /* Hide the Google Translate top banner that pushes body down */
+      .goog-te-banner-frame.skiptranslate { display: none !important; }
+      body { top: 0 !important; }
+
+      /* Position the translate widget fixed in the utility bar area */
+      #gt_widget {
+        position: fixed;
+        top: 4px;
+        right: 16px;
+        z-index: 10000;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+
+      /* Hide "Powered by" text, keep only the <select> */
+      #gt_widget .goog-te-gadget {
+        font-size: 0 !important;
+        color: transparent !important;
+        margin: 0;
+        padding: 0;
+      }
+      #gt_widget .goog-te-gadget > span,
+      #gt_widget .goog-te-gadget > a,
+      #gt_widget .goog-te-gadget > div:not(:first-child) {
+        display: none !important;
+      }
+      #gt_widget .goog-logo-link { display: none !important; }
+
+      /* Style the native <select> dropdown */
+      #gt_widget .goog-te-combo {
+        font-family: 'Nunito', sans-serif;
+        font-size: 12px;
+        font-weight: 600;
+        color: #fff;
+        background: rgba(255,255,255,0.08);
+        border: 1px solid rgba(255,255,255,0.22);
+        border-radius: 6px;
+        padding: 2px 6px;
+        height: 24px;
+        outline: none;
+        cursor: pointer;
+      }
+      #gt_widget .goog-te-combo:hover,
+      #gt_widget .goog-te-combo:focus {
+        border-color: rgba(255,255,255,0.45);
+        background: rgba(255,255,255,0.12);
+      }
+      #gt_widget .goog-te-combo option {
+        color: #222;
+        background: #fff;
+        font-size: 13px;
+      }
+
+      /* Translate icon next to the dropdown */
+      #gt_icon {
+        color: rgba(255,255,255,0.65);
+        font-size: 15px;
+        pointer-events: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="gt_widget">
+      <svg id="gt_icon" xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M12.87 15.07l-2.54-2.51.03-.03A17.52 17.52 0 0014.07 6H17V4h-7V2H8v2H1v1.99h11.17C11.5 7.92 10.44 9.75 9 11.35 8.07 10.32 7.3 9.19 6.69 8h-2c.73 1.63 1.73 3.17 2.98 4.56l-5.09 5.02L4 19l5-5 3.11 3.11.76-2.04zM18.5 10h-2L12 22h2l1.12-3h4.75L21 22h2l-4.5-12zm-2.62 7l1.62-4.33L19.12 17h-3.24z"/>
+      </svg>
+      <div id="google_translate_element"></div>
+    </div>
+    <div id="root"></div>
+    <script type="text/javascript">
+      function googleTranslateElementInit() {
+        new google.translate.TranslateElement(
+          {
+            pageLanguage: 'en',
+            includedLanguages: 'bn,gu,hi,kn,ml,mr,pa,ta,te',
+            layout: google.translate.TranslateElement.InlineLayout.SIMPLE,
+            autoDisplay: false
+          },
+          'google_translate_element'
+        );
+      }
+    </script>
+    <script type="text/javascript" src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>
