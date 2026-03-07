@@ -12,22 +12,36 @@ class CategorySerializer(serializers.ModelSerializer):
 class ProductSerializer(serializers.ModelSerializer):
     category_name = serializers.SerializerMethodField()
     image_url = serializers.SerializerMethodField()
+    vendor_name = serializers.SerializerMethodField()
 
     def get_category_name(self, obj):
         return obj.category.name if obj.category else ''
 
+    def get_vendor_name(self, obj):
+        if not obj.vendor:
+            return ''
+        profile = getattr(obj.vendor, 'vendor_profile', None)
+        if profile and profile.business_name:
+            return profile.business_name
+        full = obj.vendor.get_full_name()
+        if full:
+            return full
+        return obj.vendor.phone or f'Vendor #{obj.vendor_id}'
+
     def get_image_url(self, obj):
         if not obj.image:
             return None
+        url = obj.image.url
+        if url.startswith('http'):
+            return url
         request = self.context.get('request')
         if request:
-            media = settings.MEDIA_URL if settings.MEDIA_URL.startswith('/') else '/' + settings.MEDIA_URL
-            return request.build_absolute_uri(media + str(obj.image))
-        return obj.image.url
+            return request.build_absolute_uri(url)
+        return url
 
     class Meta:
         model = Product
-        fields = ['id', 'name', 'description', 'price', 'unit', 'stock', 'image', 'image_url', 'category', 'category_name', 'is_active', 'created_at', 'updated_at']
+        fields = ['id', 'name', 'description', 'price', 'unit', 'stock', 'image', 'image_url', 'category', 'category_name', 'vendor_name', 'is_active', 'created_at', 'updated_at']
         read_only_fields = ['vendor']
 
 

@@ -4,7 +4,7 @@ from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
-from .bedrock_client import predict_yield, suggest_crops
+from .gemini_yield import predict_yield, suggest_crops
 from .models import CropSuggestionQuery, YieldQuery
 from .serializers import CropSuggestionSerializer, YieldPredictionSerializer
 
@@ -23,6 +23,9 @@ def yield_predict(request):
             region=d["region"],
             season=d["season"],
             area=d.get("area", ""),
+            latitude=d.get("latitude"),
+            longitude=d.get("longitude"),
+            location_name=d.get("location_name", ""),
         )
     except Exception as exc:
         logger.exception("Yield prediction error")
@@ -55,6 +58,9 @@ def crop_suggestions(request):
             region=d["region"],
             season=d["season"],
             current_crop=d.get("current_crop", ""),
+            latitude=d.get("latitude"),
+            longitude=d.get("longitude"),
+            location_name=d.get("location_name", ""),
         )
     except Exception as exc:
         logger.exception("Crop suggestion error")

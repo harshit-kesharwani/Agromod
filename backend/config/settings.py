@@ -61,8 +61,12 @@ WSGI_APPLICATION = 'config.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': env('DB_ENGINE', 'django.db.backends.postgresql'),
+        'NAME': env('DB_NAME', 'agromod'),
+        'USER': env('DB_USER', 'agromod_admin'),
+        'PASSWORD': env('DB_PASSWORD', ''),
+        'HOST': env('DB_HOST', 'localhost'),
+        'PORT': env('DB_PORT', '5432'),
     }
 }
 
@@ -95,10 +99,32 @@ TIME_ZONE = 'UTC'
 USE_I18N = True
 USE_TZ = True
 
-STATIC_URL = 'static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
-MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
+
+AWS_STORAGE_BUCKET_NAME = env('AWS_STORAGE_BUCKET_NAME', '')
+AWS_S3_REGION_NAME = env('AWS_S3_REGION_NAME', 'us-east-1')
+
+if AWS_STORAGE_BUCKET_NAME:
+    AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com'
+    AWS_DEFAULT_ACL = None
+    AWS_S3_OBJECT_PARAMETERS = {'CacheControl': 'max-age=86400'}
+    STORAGES = {
+        "default": {"BACKEND": "storages.backends.s3boto3.S3Boto3Storage"},
+        "staticfiles": {"BACKEND": "storages.backends.s3boto3.S3StaticStorage"},
+    }
+    STATIC_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/static/'
+    MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/media/'
+else:
+    STATIC_URL = 'static/'
+    MEDIA_URL = '/media/'
+
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.db.DatabaseCache',
+        'LOCATION': 'django_cache',
+    }
+}
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 AUTH_USER_MODEL = 'accounts.User'
@@ -109,9 +135,12 @@ REST_FRAMEWORK = {
 }
 
 # ---------------------------------------------------------------------------
-# AWS Bedrock
+# Google Gemini (replaced AWS Bedrock due to new-account service limits)
 # ---------------------------------------------------------------------------
-AWS_ACCESS_KEY_ID = env('AWS_ACCESS_KEY_ID', '')
-AWS_SECRET_ACCESS_KEY = env('AWS_SECRET_ACCESS_KEY', '')
-AWS_BEDROCK_REGION = env('AWS_BEDROCK_REGION', 'us-east-1')
-AWS_BEDROCK_MODEL_ID = env('AWS_BEDROCK_MODEL_ID', 'amazon.nova-lite-v1:0')
+GEMINI_API_KEY = env('GEMINI_API_KEY', '')
+GEMINI_MODEL = env('GEMINI_MODEL', 'gemini-2.5-flash')
+
+# ---------------------------------------------------------------------------
+# AWS SNS (OTP SMS)
+# ---------------------------------------------------------------------------
+AWS_SNS_REGION = env('AWS_SNS_REGION', 'ap-south-1')

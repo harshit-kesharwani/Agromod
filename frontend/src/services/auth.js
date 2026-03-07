@@ -1,12 +1,26 @@
 import api from './api'
 
-export async function login(email, password, userType) {
-  const { data } = await api.post('/api/auth/login/', { email, password, user_type: userType })
+export async function login(phone, password, userType) {
+  const { data } = await api.post('/api/auth/login/', {
+    phone: phone.replace(/[\s-]/g, ''),
+    password,
+    user_type: userType,
+  })
   return data
 }
 
 export async function register(payload) {
   const { data } = await api.post('/api/auth/register/', payload)
+  return data
+}
+
+export async function verifyOtp(phone, otp) {
+  const { data } = await api.post('/api/auth/verify-otp/', { phone, otp })
+  return data
+}
+
+export async function resendOtp(phone) {
+  const { data } = await api.post('/api/auth/resend-otp/', { phone })
   return data
 }
 
@@ -32,16 +46,17 @@ export function getStoredTokens() {
   }
 }
 
-export async function forgotPassword(email) {
-  const { data } = await api.post('/api/auth/forgot-password/', { email })
+export async function forgotPassword(phone) {
+  const { data } = await api.post('/api/auth/forgot-password/', { phone })
   return data
 }
 
-export async function resetPassword(email, token, newPassword) {
+export async function resetPassword(phone, otp, newPassword, confirmPassword) {
   const { data } = await api.post('/api/auth/reset-password/', {
-    email,
-    token,
+    phone,
+    otp,
     new_password: newPassword,
+    confirm_password: confirmPassword,
   })
   return data
 }

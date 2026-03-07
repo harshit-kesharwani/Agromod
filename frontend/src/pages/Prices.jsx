@@ -189,11 +189,12 @@ export default function Prices() {
           )}
         </Box>
 
-        <Grid container spacing={2}>
+        <Grid container spacing={2} className="notranslate" translate="no">
           <Grid item xs={12} sm={6} md={3}>
             <FormControl fullWidth size="small">
               <InputLabel>Crop</InputLabel>
-              <Select label="Crop" value={selectedCrop} onChange={(e) => setSelectedCrop(e.target.value)}>
+              <Select label="Crop" value={selectedCrop} onChange={(e) => setSelectedCrop(e.target.value)}
+                MenuProps={{ className: 'notranslate', translate: 'no' }}>
                 <MenuItem value="">All Crops</MenuItem>
                 {crops.map(c => <MenuItem key={c} value={c}>{c}</MenuItem>)}
               </Select>
@@ -202,7 +203,8 @@ export default function Prices() {
           <Grid item xs={12} sm={6} md={3}>
             <FormControl fullWidth size="small">
               <InputLabel>State</InputLabel>
-              <Select label="State" value={selectedState} onChange={(e) => { setSelectedState(e.target.value); setSelectedCentre('') }}>
+              <Select label="State" value={selectedState} onChange={(e) => { setSelectedState(e.target.value); setSelectedCentre('') }}
+                MenuProps={{ className: 'notranslate', translate: 'no' }}>
                 <MenuItem value="">All States</MenuItem>
                 {states.map(s => <MenuItem key={s} value={s}>{s}</MenuItem>)}
               </Select>
@@ -211,7 +213,8 @@ export default function Prices() {
           <Grid item xs={12} sm={6} md={3}>
             <FormControl fullWidth size="small" disabled={!selectedState || centres.length === 0}>
               <InputLabel>City / Centre</InputLabel>
-              <Select label="City / Centre" value={selectedCentre} onChange={(e) => setSelectedCentre(e.target.value)}>
+              <Select label="City / Centre" value={selectedCentre} onChange={(e) => setSelectedCentre(e.target.value)}
+                MenuProps={{ className: 'notranslate', translate: 'no' }}>
                 <MenuItem value="">All Centres</MenuItem>
                 {centres.map(c => <MenuItem key={c} value={c}>{c}</MenuItem>)}
               </Select>
@@ -224,6 +227,7 @@ export default function Prices() {
                 label="Year(s)" multiple value={selectedYears}
                 onChange={(e) => setSelectedYears(typeof e.target.value === 'string' ? e.target.value.split(',') : e.target.value)}
                 renderValue={(selected) => selected.join(', ')}
+                MenuProps={{ className: 'notranslate', translate: 'no' }}
               >
                 {years.map(y => <MenuItem key={y} value={y}>{y}</MenuItem>)}
               </Select>

@@ -112,3 +112,20 @@ htmlcov/
 
 # Vite cache
 frontend/.vite/
+
+# ============================
+# Lambda / Deployment artifacts
+# ============================
+backend/lambda_package/
+backend/lambda_package.zip
+backend/handler_venv/
+backend/lambda_env.json
+backend/zappa_settings.json
+temp_deployed.js
+
+# ============================
+# Empty asset / image dirs
+# ============================
+proposal_images/
+template_images/
+

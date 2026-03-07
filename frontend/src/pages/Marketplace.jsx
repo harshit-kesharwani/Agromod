@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
-import { Typography, Paper, Grid, Card, CardContent, CardActionArea, Button, TextField, Box, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material'
+import { Typography, Paper, Grid, Card, CardContent, CardMedia, CardActionArea, Button, TextField, Box, Dialog, DialogTitle, DialogContent, DialogActions, Chip } from '@mui/material'
+import StorefrontIcon from '@mui/icons-material/Storefront'
 import Layout from '../components/Layout'
 import api from '../services/api'
 
@@ -51,10 +52,34 @@ export default function Marketplace() {
           <Grid item xs={12} sm={6} md={4} key={p.id}>
             <Card>
               <CardActionArea onClick={() => addToCart(p)}>
+                {(p.image_url || p.image) ? (
+                  <CardMedia
+                    component="img"
+                    height="160"
+                    image={p.image_url || p.image}
+                    alt={p.name}
+                    sx={{ objectFit: 'cover' }}
+                  />
+                ) : (
+                  <Box sx={{ height: 160, bgcolor: 'grey.200', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <Typography color="text.secondary" variant="body2">No image</Typography>
+                  </Box>
+                )}
                 <CardContent>
                   <Typography variant="h6">{p.name}</Typography>
                   <Typography color="text.secondary">{p.category_name} • ₹{p.price}/{p.unit}</Typography>
-                  <Typography variant="body2">Stock: {p.stock}</Typography>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 0.5 }}>
+                    <Typography variant="body2">Stock: {p.stock}</Typography>
+                    {p.vendor_name && (
+                      <Chip
+                        icon={<StorefrontIcon sx={{ fontSize: 14 }} />}
+                        label={p.vendor_name}
+                        size="small"
+                        variant="outlined"
+                        sx={{ fontSize: '0.7rem', height: 22, maxWidth: 160 }}
+                      />
+                    )}
+                  </Box>
                 </CardContent>
               </CardActionArea>
               <Box sx={{ p: 1 }}>
